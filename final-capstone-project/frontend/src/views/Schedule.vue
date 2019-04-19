@@ -28,7 +28,7 @@
                 <thead>
                     <tr>
                         <th scope="col" style="width: 5%"></th>
-                        <th scope="col" v-for="employer in employers" :key="employer.employerId" class="text-center align-middle" style="width: 5%"><input type="hidden" v-model="finalSchedule[employer.employerId]">{{employer.companyName}}</th>
+                        <!-- <th scope="col" v-for="employer in employers" :key="employer.employerId" class="text-center align-middle" style="width: 5%"><input type="hidden" v-model="finalSchedule[employer.employerId]">{{employer.companyName}}</th> -->
                     </tr>
                 </thead>
                     <tbody>
@@ -59,6 +59,8 @@
 </template>
 
 <script>
+import auth from '../auth';
+
 export default {
     props: [
         'scheduleChoice'
@@ -78,7 +80,13 @@ export default {
         }
     },
     created() {
-        fetch(`${process.env.VUE_APP_API_URL}/timeslots/${this.$route.params.scheduleChoice}`)
+        fetch(`${process.env.VUE_APP_API_URL}/timeslots/${this.$route.params.scheduleChoice}`,  {
+        method: 'GET',
+        headers: new Headers({
+          Authorization: 'Bearer ' + auth.getToken(),   
+        }),
+        credentials: 'same-origin',  
+        })
         .then(response => {
             return response.json();
         }).then ((timeSlots) => {
@@ -86,7 +94,14 @@ export default {
         }).catch(err => {
             console.log(err);
         });
-        fetch(`${process.env.VUE_APP_API_URL}/studentsBySchedule/${this.$route.params.scheduleChoice}`)
+
+        fetch(`${process.env.VUE_APP_API_URL}/studentsBySchedule/${this.$route.params.scheduleChoice}`,  {
+        method: 'GET',
+        headers: new Headers({
+          Authorization: 'Bearer ' + auth.getToken(),   
+        }),
+        credentials: 'same-origin',  
+        })
         .then(response => {
             return response.json();
         }).then ((studentsBySchedule) => {
@@ -94,7 +109,14 @@ export default {
         }).catch(err => {
             console.log(err);
         });
-        fetch(`${process.env.VUE_APP_API_URL}/employersBySchedule/${this.$route.params.scheduleChoice}`)
+
+        fetch(`${process.env.VUE_APP_API_URL}/employersBySchedule/${this.$route.params.scheduleChoice}`,  {
+        method: 'GET',
+        headers: new Headers({
+          Authorization: 'Bearer ' + auth.getToken(),   
+        }),
+        credentials: 'same-origin',  
+        })
         .then(response => {
             return response.json();
         }).then ((employers) => {
@@ -102,16 +124,29 @@ export default {
         }).catch(err => {
             console.log(err);
         });
-        fetch(`${process.env.VUE_APP_API_URL}/schedule/${this.$route.params.scheduleChoice}`)
+        
+        fetch(`${process.env.VUE_APP_API_URL}/schedule/${this.$route.params.scheduleChoice}`,  {
+        method: 'GET',
+        headers: new Headers({
+          Authorization: 'Bearer ' + auth.getToken(),   
+        }),
+        credentials: 'same-origin',  
+        })
         .then(response => {
             return response.json();
         }).then ((schedule) => {
-            console.log(schedule)
             this.schedule = schedule;   
         }).catch(err => {
             console.log(err);
         });
-        fetch(`${process.env.VUE_APP_API_URL}/students`)
+
+        fetch(`${process.env.VUE_APP_API_URL}/students`,  {
+        method: 'GET',
+        headers: new Headers({
+          Authorization: 'Bearer ' + auth.getToken(),   
+        }),
+        credentials: 'same-origin',  
+        })
         .then(response => {
             return response.json();
         }).then ((students) => {
@@ -122,10 +157,7 @@ export default {
     },
     methods: {
         submitFinalSchedule() {
-            //console.table(JSON.stringify(this.finalSchedule))
-            //console.log(Object.keys(this.finalSchedule))
             const sendArray = [];
-            // sendArray.push("ScheduleId: " + this.finalSchedule.scheduleId);
             Object.keys(this.finalSchedule).forEach(k => {
                 if(k.startsWith("Key")){
                     sendArray.push(this.finalSchedule[k])
@@ -136,12 +168,16 @@ export default {
             fetch(`${process.env.VUE_APP_API_URL}/submitFinalSchedule`, {
                 method: 'POST',
                 headers: {
+                    Authorization: 'Bearer ' + auth.getToken(),   
                     "Content-Type" : "application/json"
                 },
                 body: JSON.stringify(sendArray),
+                credentials: 'same-origin'
             })
             .then((response) => {
-                    return response.json();
+                if(response.ok){
+                    this.$router.push('/thank-you');
+                }
             })
             .catch((err) => console.error(err));
         },
