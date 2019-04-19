@@ -41,7 +41,7 @@
                             <tr v-else>
                                 <th scope="row" class="text-center align-middle" style="width: 5%">{{ [ time[0], "HH:mm" ] | moment("h:mm A") }} {{ time[1] }} {{ [ time[2], "HH:mm" ] | moment("h:mm A") }}</th>
                                 <td v-for="(employer) in employers" :key="employer.employerId" class="text-center align-middle" style="width: 5%">
-                                     <select class="form-control" v-model="finalSchedule['Key' + employer.employerId + time[0].replace(':','')]"> 
+                                     <select class="form-control" v-model="finalSchedule['Key' + employer.employerId + time[0].replace(':','')]" @change="studentSelected"> 
                                         <option value="" selected disabled>Choose...</option>
                                         <option v-for="student in getStudents" :key="student.studentId + employer.employerId + time[0]" :value="{scheduleId: finalSchedule.scheduleId, startTime: time[0], endTime: time[2], studentId: student.studentId, employerId: employer.employerId}">{{student.firstName}} {{student.lastName}}</option>
                                     </select>
@@ -144,6 +144,12 @@ export default {
                     return response.json();
             })
             .catch((err) => console.error(err));
+        },
+        studentSelected(event) {
+            const selectBoxesInRow =  Array.from(event.target.closest("tr").querySelectorAll("select")).filter( sb => sb !== event.target);
+            selectBoxesInRow.forEach(sb => {
+                console.log(sb.$data, this)
+            })
         }
     },
     computed: {
